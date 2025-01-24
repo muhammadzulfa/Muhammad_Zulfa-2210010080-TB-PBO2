@@ -50,6 +50,7 @@ public class PelangganFrame extends javax.swing.JFrame {
         tablePelanggan = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Master Data Pelanggan");
         setAlwaysOnTop(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {

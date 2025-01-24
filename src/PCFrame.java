@@ -53,6 +53,7 @@ public class PCFrame extends javax.swing.JFrame {
         txtSpesifikasi = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Master Data PC");
         setAlwaysOnTop(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
