@@ -333,13 +333,7 @@ public class PelangganFrame extends javax.swing.JFrame {
                     if (rowsDeleted > 0) {
                         JOptionPane.showMessageDialog(this, "Data berhasil dihapus!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
 
-                        // Reset input field dan tabel
-                        txtNama.setText("");
-                        txtAlamat.setText("");
-                        txtNoHp.setText("");
-                        selectedId = -1;  // Reset selectedId setelah penghapusan
-
-                        // Muat ulang data tabel setelah penghapusan
+                        clearForm();
                         loadTable();
                     }
                 }
@@ -348,7 +342,7 @@ public class PelangganFrame extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_btnHapusActionPerformed
-
+                                      
     /**
      * @param args the command line arguments
      */
