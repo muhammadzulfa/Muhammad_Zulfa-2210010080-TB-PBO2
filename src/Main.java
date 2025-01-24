@@ -1,8 +1,6 @@
 import java.sql.*;
 import java.awt.GridLayout;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -12,9 +10,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.table.DefaultTableModel;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
+
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -284,7 +286,17 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_menuPelangganActionPerformed
 
     private void menuLaporanTransaksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanTransaksiActionPerformed
-        // TODO add your handling code here:
+        try {
+            String reportPath = "src/report/transReport.jasper";
+            Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            
+            HashMap<String, Object> parameters = new HashMap<>();
+            JasperPrint print = JasperFillManager.fillReport(reportPath, parameters, con);
+//            JasperViewer viewer = new JasperViewer(print, true);
+//            viewer.setVisible(true);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Gagal menampilkan report: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_menuLaporanTransaksiActionPerformed
 
     private void menuLaporanPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanPCActionPerformed
@@ -758,4 +770,6 @@ public class Main extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Gagal memuat data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    
 }
