@@ -183,11 +183,13 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void menuPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPCActionPerformed
-        // TODO add your handling code here:
+         PCFrame pcFrame = new PCFrame();
+         pcFrame.setVisible(true);
     }//GEN-LAST:event_menuPCActionPerformed
 
     private void menuPelangganActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPelangganActionPerformed
-        // TODO add your handling code here:
+        PelangganFrame pelangganFrame = new PelangganFrame();
+        pelangganFrame.setVisible(true);
     }//GEN-LAST:event_menuPelangganActionPerformed
 
     private void menuLaporanTransaksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanTransaksiActionPerformed
