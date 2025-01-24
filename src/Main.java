@@ -1,3 +1,21 @@
+import java.sql.*;
+import java.awt.GridLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import com.toedter.calendar.JDateChooser;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.table.DefaultTableModel;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -9,6 +27,10 @@
  */
 public class Main extends javax.swing.JFrame {
 
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/java_sewa_pc";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "root";
+    
     /**
      * Creates new form Main
      */
@@ -33,12 +55,17 @@ public class Main extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        tableTransaksi = new javax.swing.JTable();
+        btnBuatTransaksi = new javax.swing.JButton();
+        btnHapusTrasaksi = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 0, 102));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         menuPC.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         menuPC.setLabel("PC");
@@ -96,7 +123,7 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(menuLaporanTransaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(menuLaporanPC, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(58, Short.MAX_VALUE))
         );
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 2, 36)); // NOI18N
@@ -107,75 +134,88 @@ public class Main extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
+                .addGap(195, 195, 195)
                 .addComponent(jLabel1)
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(220, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
                 .addComponent(jLabel1)
-                .addGap(19, 19, 19))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableTransaksi.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "TGL SEWA", "TGL KEMBALI", "PELANGGAN", "ALAMAT", "PC", "TOTAL"
             }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false, false, false, false, true, true
+            };
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jButton1.setText("Buat Transaksi");
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
 
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jButton2.setText("Hapus Transaksi");
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tableTransaksi);
+
+        btnBuatTransaksi.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnBuatTransaksi.setText("Buat Transaksi");
+        btnBuatTransaksi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuatTransaksiActionPerformed(evt);
+            }
+        });
+
+        btnHapusTrasaksi.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnHapusTrasaksi.setText("Hapus Transaksi");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnHapusTrasaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(btnBuatTransaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)))
+                    .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(btnBuatTransaksi)
+                    .addComponent(btnHapusTrasaksi))
                 .addContainerGap())
         );
 
@@ -199,6 +239,249 @@ public class Main extends javax.swing.JFrame {
     private void menuLaporanPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLaporanPCActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_menuLaporanPCActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        loadTable();
+    }//GEN-LAST:event_formWindowOpened
+
+    private void btnBuatTransaksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuatTransaksiActionPerformed
+        // Membuat panel form untuk transaksi
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(6, 2, 5, 5));  // 6 baris, 2 kolom
+
+        // Membuat komponen input form
+        JLabel lblPC = new JLabel("Pilih PC:");
+        JComboBox<String> cmbPC = new JComboBox<>();
+        JLabel lblPelanggan = new JLabel("Pilih Pelanggan:");
+        JComboBox<String> cmbPelanggan = new JComboBox<>();
+        JLabel lblTglSewa = new JLabel("Tanggal Sewa:");
+        JDateChooser dateChooserTglSewa = new JDateChooser();
+        dateChooserTglSewa.setDateFormatString("yyyy-MM-dd");  // Format tanggal
+        JLabel lblTglKembali = new JLabel("Tanggal Kembali:");
+        JDateChooser dateChooserTglKembali = new JDateChooser();
+        dateChooserTglKembali.setDateFormatString("yyyy-MM-dd");  // Format tanggal
+        JLabel lblTotalHarga = new JLabel("Total Harga:");
+        JTextField txtTotalHarga = new JTextField();
+
+        // Mengambil data PC dari database untuk diisi ke dalam ComboBox
+        try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // Mengambil data PC
+            String sqlPC = "SELECT id, nama, merek FROM pc WHERE ketersediaan = 'Tersedia'";
+            try (PreparedStatement stmtPC = koneksi.prepareStatement(sqlPC);
+                ResultSet rsPC = stmtPC.executeQuery()) {
+                
+                // Menambahkan item kosong di awal comboBox
+                cmbPC.addItem("");  // Item kosong atau default
+                
+                while (rsPC.next()) {
+                    int pcId = rsPC.getInt("id");
+                    String pcName = rsPC.getString("nama");
+                    String pcMerk = rsPC.getString("merek");
+                    cmbPC.addItem(pcId + " - " + pcName + " " + pcMerk);  // Format: ID - Nama Merk
+                }
+            }
+
+            // Mengambil data Pelanggan dari database untuk diisi ke dalam ComboBox
+            String sqlPelanggan = "SELECT id, nama FROM pelanggan";
+            try (PreparedStatement stmtPelanggan = koneksi.prepareStatement(sqlPelanggan);
+                ResultSet rsPelanggan = stmtPelanggan.executeQuery()) {
+                
+                // Menambahkan item kosong di awal comboBox
+                cmbPelanggan.addItem("");  // Item kosong atau default
+                
+                while (rsPelanggan.next()) {
+                    int pelangganId = rsPelanggan.getInt("id");
+                    String pelangganName = rsPelanggan.getString("nama");
+                    cmbPelanggan.addItem(pelangganId + " - " + pelangganName);  // Format: ID - Nama
+                }
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Gagal mengambil data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        // Variabel untuk menyimpan harga PC per hari
+        final AtomicInteger hargaPcPerhari = new AtomicInteger(0); 
+        
+        // Menambahkan Listener untuk ComboBox PC
+        cmbPC.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Ambil PC yang dipilih dari ComboBox
+                String selectedPC = (String) cmbPC.getSelectedItem();
+                if (selectedPC != null) {
+                    // Mengambil ID dari string yang dipilih (mengambil nilai ID di awal sebelum "-")
+                    int pcId = Integer.parseInt(selectedPC.split(" - ")[0]);
+
+                    // Ambil harga dari database berdasarkan pcId yang dipilih
+                    try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                        String sqlHarga = "SELECT harga FROM pc WHERE id = ?";
+                        try (PreparedStatement stmtHarga = koneksi.prepareStatement(sqlHarga)) {
+                            stmtHarga.setInt(1, pcId);
+
+                            try (ResultSet rsHarga = stmtHarga.executeQuery()) {
+                                if (rsHarga.next()) {
+                                    // Ambil harga dan set ke txtTotalHarga
+                                    String harga = rsHarga.getString("harga");
+                                    txtTotalHarga.setText(harga);
+                                    
+                                    hargaPcPerhari.set(Integer.parseInt(harga));
+                                }
+                            }
+                        }
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(Main.this, "Gagal mengambil harga PC: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        
+        // Menambahkan Listener untuk tanggal sewa dan tanggal kembali
+        dateChooserTglSewa.getDateEditor().addPropertyChangeListener((evt2) -> {
+            // Cek apakah tanggal sewa dan tanggal kembali sudah dipilih
+            java.util.Date tglSewaDate = dateChooserTglSewa.getDate();
+            java.util.Date tglKembaliDate = dateChooserTglKembali.getDate();
+
+            // Jika keduanya sudah dipilih
+            if (tglSewaDate != null && tglKembaliDate != null) {
+                // Hitung selisih hari
+                long differenceInMillies = tglKembaliDate.getTime() - tglSewaDate.getTime();
+                long differenceInDays = TimeUnit.DAYS.convert(differenceInMillies, TimeUnit.MILLISECONDS);
+
+                // Ambil harga dari textfield
+                String hargaText = txtTotalHarga.getText();
+                if (!hargaText.isEmpty()) {
+                    try {
+                        // Menghitung total harga
+                        double totalHarga = hargaPcPerhari.get() * differenceInDays;
+                        txtTotalHarga.setText(String.format("%.2f", totalHarga));  // Update total harga dengan format dua decimal
+                    } catch (NumberFormatException e) {
+                        // Jika terjadi kesalahan parsing harga
+                        JOptionPane.showMessageDialog(this, "Harga tidak valid", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        
+        dateChooserTglKembali.getDateEditor().addPropertyChangeListener((evt2) -> {
+            // Cek apakah tanggal sewa dan tanggal kembali sudah dipilih
+            java.util.Date tglSewaDate = dateChooserTglSewa.getDate();
+            java.util.Date tglKembaliDate = dateChooserTglKembali.getDate();
+
+            // Jika keduanya sudah dipilih
+            if (tglSewaDate != null && tglKembaliDate != null) {
+                // Hitung selisih hari
+                long differenceInMillies = tglKembaliDate.getTime() - tglSewaDate.getTime();
+                long differenceInDays = TimeUnit.DAYS.convert(differenceInMillies, TimeUnit.MILLISECONDS);
+
+                // Ambil harga dari textfield
+                String hargaText = txtTotalHarga.getText();
+                if (!hargaText.isEmpty()) {
+                    try {
+                        // Menghitung total harga
+                        double totalHarga = hargaPcPerhari.get() * differenceInDays;
+                        txtTotalHarga.setText(String.format("%.2f", totalHarga));  // Update total harga dengan format dua decimal
+                    } catch (NumberFormatException e) {
+                        // Jika terjadi kesalahan parsing harga
+                        JOptionPane.showMessageDialog(this, "Harga tidak valid", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        
+        // Menambahkan komponen ke panel
+        panel.add(lblPC);
+        panel.add(cmbPC);
+        panel.add(lblPelanggan);
+        panel.add(cmbPelanggan);
+        panel.add(lblTglSewa);
+        panel.add(dateChooserTglSewa);
+        panel.add(lblTglKembali);
+        panel.add(dateChooserTglKembali);
+        panel.add(lblTotalHarga);
+        panel.add(txtTotalHarga);
+        panel.setPreferredSize(new Dimension(500, 200));
+        
+        // Membuka dialog untuk menampilkan form
+        int option = JOptionPane.showConfirmDialog(this, panel, "Buat Transaksi", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        // Jika klik OK
+        if (option == JOptionPane.OK_OPTION) {
+            // Mengambil data dari form
+            String selectedPC = cmbPC.getSelectedItem().toString();
+            String selectedPelanggan = cmbPelanggan.getSelectedItem().toString();
+            java.util.Date tglSewaDate = dateChooserTglSewa.getDate();
+            java.util.Date tglKembaliDate = dateChooserTglKembali.getDate();
+            String totalHarga = txtTotalHarga.getText();
+
+            // Validasi jika ada field kosong atau ComboBox yang belum dipilih
+            if (tglSewaDate == null || tglKembaliDate == null || totalHarga.isEmpty() ||
+                cmbPC.getSelectedItem() == null || cmbPC.getSelectedItem().toString().isEmpty() ||
+                cmbPelanggan.getSelectedItem() == null || cmbPelanggan.getSelectedItem().toString().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Formulir tidak boleh ada yang kosong atau tidak dipilih!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Mengambil id dari ComboBox (misalnya ID PC dan ID Pelanggan)
+            int pcId = Integer.parseInt(selectedPC.split(" - ")[0]);
+            int pelangganId = Integer.parseInt(selectedPelanggan.split(" - ")[0]);
+
+            // Mengonversi tanggal ke format string (yyyy-MM-dd)
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String tglSewa = sdf.format(tglSewaDate);
+            String tglKembali = sdf.format(tglKembaliDate);
+
+            // Koneksi ke database dan eksekusi query INSERT
+            try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                // Mulai transaksi
+                koneksi.setAutoCommit(false);
+
+                try {
+                    // Query untuk menambahkan data transaksi
+                    String sqlTransaksi = "INSERT INTO transaksi (pc_id, pelanggan_id, tgl_sewa, tgl_kembali, total_harga) VALUES (?, ?, ?, ?, ?)";
+                    try (PreparedStatement preparedStatement = koneksi.prepareStatement(sqlTransaksi)) {
+                        preparedStatement.setInt(1, pcId);
+                        preparedStatement.setInt(2, pelangganId);
+                        preparedStatement.setString(3, tglSewa);
+                        preparedStatement.setString(4, tglKembali);
+                        preparedStatement.setString(5, totalHarga);
+
+                        int rowsInserted = preparedStatement.executeUpdate();
+                        if (rowsInserted > 0) {
+                            // Query untuk mengubah ketersediaan pc menjadi 'Disewa'
+                            String sqlUpdatePc = "UPDATE pc SET ketersediaan = 'Disewa' WHERE id = ?";
+                            try (PreparedStatement updateStatement = koneksi.prepareStatement(sqlUpdatePc)) {
+                                updateStatement.setInt(1, pcId);
+                                int rowsUpdated = updateStatement.executeUpdate();
+
+                                if (rowsUpdated > 0) {
+                                    JOptionPane.showMessageDialog(this, "Transaksi berhasil ditambahkan dan PC sudah disewa!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                                    // Memuat ulang tabel atau memperbarui tampilan
+                                    loadTable(); 
+                                } else {
+                                    JOptionPane.showMessageDialog(this, "Gagal mengubah status ketersediaan PC", "Error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        }
+                        // Commit transaksi jika semuanya berhasil
+                        koneksi.commit();
+                    } catch (SQLException ex) {
+                        // Rollback jika terjadi error
+                        koneksi.rollback();
+                        JOptionPane.showMessageDialog(this, "Gagal menyimpan data transaksi: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    // Rollback jika terjadi error
+                    koneksi.rollback();
+                    JOptionPane.showMessageDialog(this, "Gagal melakukan transaksi: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    koneksi.setAutoCommit(true); // Set auto-commit kembali ke true setelah transaksi selesai
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Gagal menyambung ke database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnBuatTransaksiActionPerformed
 
     /**
      * @param args the command line arguments
@@ -236,16 +519,63 @@ public class Main extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnBuatTransaksi;
+    private javax.swing.JButton btnHapusTrasaksi;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private java.awt.Button menuLaporanPC;
     private java.awt.Button menuLaporanTransaksi;
     private java.awt.Button menuPC;
     private java.awt.Button menuPelanggan;
     private java.awt.Panel panel1;
+    private javax.swing.JTable tableTransaksi;
     // End of variables declaration//GEN-END:variables
+
+    private void loadTable() {
+        // Mendapatkan model tabel dari tablePelanggan
+        DefaultTableModel model = (DefaultTableModel) tableTransaksi.getModel();
+
+        // Menghapus data lama di tabel
+        model.setRowCount(0);
+
+        // Koneksi ke database dan membaca data
+        try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // Query dengan JOIN untuk menggabungkan data dari tabel transaksi, pelanggan, dan pc
+            String sql = "SELECT t.id, t.tgl_sewa, t.tgl_kembali, p.nama AS nama_pelanggan, p.alamat AS alamat_pelanggan, CONCAT(pc.nama, ' - ', pc.merek) AS nama_pc, t.total_harga " +
+                         "FROM transaksi t " +
+                         "JOIN pelanggan p ON t.pelanggan_id = p.id " +
+                         "JOIN pc pc ON t.pc_id = pc.id " +
+                         "ORDER BY t.id DESC";
+
+            try (Statement statement = koneksi.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sql)) {
+
+                // Iterasi setiap baris data dari ResultSet
+                while (resultSet.next()) {
+                    // Mengambil data dari ResultSet
+                    int id = resultSet.getInt("id");  // ID Transaksi
+                    java.util.Date tglSewa = resultSet.getDate("tgl_sewa");  // Tanggal Sewa
+                    java.util.Date tglKembali = resultSet.getDate("tgl_kembali");  // Tanggal Kembali
+                    String namaPelanggan = resultSet.getString("nama_pelanggan");  // Nama Pelanggan
+                    String alamatPelanggan = resultSet.getString("alamat_pelanggan");  // Alamat Pelanggan
+                    String namaPC = resultSet.getString("nama_pc");  // Nama PC
+                    String totalHarga = resultSet.getString("total_harga");  // Total Harga
+
+                    // Menambahkan data ke model tabel
+                    model.addRow(new Object[]{
+                        id, 
+                        tglSewa, 
+                        tglKembali, 
+                        namaPelanggan, 
+                        alamatPelanggan, 
+                        namaPC, 
+                        totalHarga
+                    });
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat data: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
