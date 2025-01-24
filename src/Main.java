@@ -31,6 +31,8 @@ public class Main extends javax.swing.JFrame {
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "root";
     
+    private int selectedId = -1;
+    
     /**
      * Creates new form Main
      */
@@ -58,6 +60,8 @@ public class Main extends javax.swing.JFrame {
         tableTransaksi = new javax.swing.JTable();
         btnBuatTransaksi = new javax.swing.JButton();
         btnHapusTrasaksi = new javax.swing.JButton();
+        btnDikembalikan = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 0, 102));
@@ -123,7 +127,7 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(menuLaporanTransaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(menuLaporanPC, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 2, 36)); // NOI18N
@@ -151,14 +155,14 @@ public class Main extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "TGL SEWA", "TGL KEMBALI", "PELANGGAN", "ALAMAT", "PC", "TOTAL"
+                "ID", "TGL SEWA", "TGL KEMBALI", "PELANGGAN", "PC", "TOTAL"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false, false, true, true
+                false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -167,6 +171,11 @@ public class Main extends javax.swing.JFrame {
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        tableTransaksi.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableTransaksiMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(tableTransaksi);
@@ -182,14 +191,27 @@ public class Main extends javax.swing.JFrame {
         btnHapusTrasaksi.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnHapusTrasaksi.setText("Hapus Transaksi");
 
+        btnDikembalikan.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnDikembalikan.setText("Dikembalikan");
+        btnDikembalikan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDikembalikanActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel2.setText("TRANSAKSI TERBARU:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnDikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnHapusTrasaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnBuatTransaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -200,7 +222,9 @@ public class Main extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2))))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -211,11 +235,16 @@ public class Main extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnBuatTransaksi)
-                    .addComponent(btnHapusTrasaksi))
+                    .addComponent(btnHapusTrasaksi)
+                    .addComponent(btnDikembalikan))
                 .addContainerGap())
         );
 
@@ -483,6 +512,70 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnBuatTransaksiActionPerformed
 
+    private void tableTransaksiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableTransaksiMouseClicked
+        int row = tableTransaksi.getSelectedRow();
+        if (row != -1) {
+            // Ambil data dari row yang dipilih
+            int id = (int) tableTransaksi.getValueAt(row, 0); // Ambil ID dari kolom pertama
+          
+            selectedId = id;
+        }
+    }//GEN-LAST:event_tableTransaksiMouseClicked
+
+    private void btnDikembalikanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDikembalikanActionPerformed
+        if (selectedId != -1) { // Pastikan ada transaksi yang dipilih
+            // Tampilkan dialog konfirmasi
+            int confirm = JOptionPane.showConfirmDialog(
+                this, 
+                "Apakah Anda yakin ingin mengubah status PC menjadi 'Tersedia'?", 
+                "Konfirmasi", 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) { // Jika pengguna memilih "Yes"
+                try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                    // Step 1: Dapatkan id_pc berdasarkan id transaksi
+                    String queryGetPC = "SELECT pc_id FROM transaksi WHERE id = ?";
+                    int idPC = -1;
+
+                    try (PreparedStatement pst = koneksi.prepareStatement(queryGetPC)) {
+                        pst.setInt(1, selectedId);
+                        try (ResultSet rs = pst.executeQuery()) {
+                            if (rs.next()) {
+                                idPC = rs.getInt("pc_id");
+                            }
+                        }
+                    }
+
+                    if (idPC != -1) { // Jika id_pc ditemukan
+                        // Step 2: Perbarui kolom ketersediaan di tabel pc
+                        String queryUpdatePC = "UPDATE pc SET ketersediaan = 'Tersedia' WHERE id = ?";
+                        try (PreparedStatement pstUpdate = koneksi.prepareStatement(queryUpdatePC)) {
+                            pstUpdate.setInt(1, idPC);
+
+                            int rowsAffected = pstUpdate.executeUpdate();
+                            if (rowsAffected > 0) {
+                                JOptionPane.showMessageDialog(this, "PC berhasil diperbarui menjadi Tersedia!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                                loadTable(); // Refresh tabel jika diperlukan
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Gagal memperbarui PC.", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "ID PC tidak ditemukan untuk transaksi ini.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Proses dibatalkan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih transaksi terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnDikembalikanActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -520,8 +613,10 @@ public class Main extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuatTransaksi;
+    private javax.swing.JButton btnDikembalikan;
     private javax.swing.JButton btnHapusTrasaksi;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private java.awt.Button menuLaporanPC;
@@ -542,7 +637,7 @@ public class Main extends javax.swing.JFrame {
         // Koneksi ke database dan membaca data
         try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             // Query dengan JOIN untuk menggabungkan data dari tabel transaksi, pelanggan, dan pc
-            String sql = "SELECT t.id, t.tgl_sewa, t.tgl_kembali, p.nama AS nama_pelanggan, p.alamat AS alamat_pelanggan, CONCAT(pc.nama, ' - ', pc.merek) AS nama_pc, t.total_harga " +
+            String sql = "SELECT t.id, t.tgl_sewa, t.tgl_kembali, p.nama AS nama_pelanggan, CONCAT(pc.nama, ' - ', pc.merek) AS nama_pc, t.total_harga " +
                          "FROM transaksi t " +
                          "JOIN pelanggan p ON t.pelanggan_id = p.id " +
                          "JOIN pc pc ON t.pc_id = pc.id " +
@@ -558,7 +653,6 @@ public class Main extends javax.swing.JFrame {
                     java.util.Date tglSewa = resultSet.getDate("tgl_sewa");  // Tanggal Sewa
                     java.util.Date tglKembali = resultSet.getDate("tgl_kembali");  // Tanggal Kembali
                     String namaPelanggan = resultSet.getString("nama_pelanggan");  // Nama Pelanggan
-                    String alamatPelanggan = resultSet.getString("alamat_pelanggan");  // Alamat Pelanggan
                     String namaPC = resultSet.getString("nama_pc");  // Nama PC
                     String totalHarga = resultSet.getString("total_harga");  // Total Harga
 
@@ -568,7 +662,6 @@ public class Main extends javax.swing.JFrame {
                         tglSewa, 
                         tglKembali, 
                         namaPelanggan, 
-                        alamatPelanggan, 
                         namaPC, 
                         totalHarga
                     });
