@@ -62,9 +62,12 @@ public class Main extends javax.swing.JFrame {
         btnHapusTrasaksi = new javax.swing.JButton();
         btnDikembalikan = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        btnRefresh = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(204, 0, 102));
+        setLocation(new java.awt.Point(0, 0));
+        setLocationByPlatform(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -190,6 +193,11 @@ public class Main extends javax.swing.JFrame {
 
         btnHapusTrasaksi.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnHapusTrasaksi.setText("Hapus Transaksi");
+        btnHapusTrasaksi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusTrasaksiActionPerformed(evt);
+            }
+        });
 
         btnDikembalikan.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnDikembalikan.setText("Dikembalikan");
@@ -202,6 +210,14 @@ public class Main extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel2.setText("TRANSAKSI TERBARU:");
 
+        btnRefresh.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnRefresh.setText("Refresh");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -210,6 +226,8 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDikembalikan, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnHapusTrasaksi, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -244,7 +262,8 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnBuatTransaksi)
                     .addComponent(btnHapusTrasaksi)
-                    .addComponent(btnDikembalikan))
+                    .addComponent(btnDikembalikan)
+                    .addComponent(btnRefresh))
                 .addContainerGap())
         );
 
@@ -252,12 +271,16 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void menuPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPCActionPerformed
-         PCFrame pcFrame = new PCFrame();
-         pcFrame.setVisible(true);
+        PCFrame pcFrame = new PCFrame();
+        // Tempatkan frame di tengah layar
+        pcFrame.setLocationRelativeTo(null);
+        pcFrame.setVisible(true);
     }//GEN-LAST:event_menuPCActionPerformed
 
     private void menuPelangganActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPelangganActionPerformed
         PelangganFrame pelangganFrame = new PelangganFrame();
+        // Tempatkan frame di tengah layar
+        pelangganFrame.setLocationRelativeTo(null);
         pelangganFrame.setVisible(true);
     }//GEN-LAST:event_menuPelangganActionPerformed
 
@@ -576,6 +599,70 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnDikembalikanActionPerformed
 
+    private void btnHapusTrasaksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusTrasaksiActionPerformed
+        if (selectedId != -1) { // Pastikan ada transaksi yang dipilih
+            // Tampilkan dialog konfirmasi
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Apakah Anda yakin ingin menghapus transaksi ini? PC terkait akan tersedia kembali.",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) { // Jika pengguna memilih "Yes"
+                try (Connection koneksi = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                    // Step 1: Dapatkan id_pc dari transaksi
+                    String queryGetPC = "SELECT pc_id FROM transaksi WHERE id = ?";
+                    int idPC = -1;
+
+                    try (PreparedStatement pstGetPC = koneksi.prepareStatement(queryGetPC)) {
+                        pstGetPC.setInt(1, selectedId);
+                        try (ResultSet rs = pstGetPC.executeQuery()) {
+                            if (rs.next()) {
+                                idPC = rs.getInt("pc_id");
+                            }
+                        }
+                    }
+
+                    if (idPC != -1) { // Jika id_pc ditemukan
+                        // Step 2: Perbarui kolom ketersediaan di tabel pc menjadi "Tersedia"
+                        String queryUpdatePC = "UPDATE pc SET ketersediaan = 'Tersedia' WHERE id = ?";
+                        try (PreparedStatement pstUpdatePC = koneksi.prepareStatement(queryUpdatePC)) {
+                            pstUpdatePC.setInt(1, idPC);
+                            pstUpdatePC.executeUpdate();
+                        }
+                    }
+
+                    // Step 3: Hapus transaksi berdasarkan ID
+                    String queryDelete = "DELETE FROM transaksi WHERE id = ?";
+                    try (PreparedStatement pstDelete = koneksi.prepareStatement(queryDelete)) {
+                        pstDelete.setInt(1, selectedId);
+
+                        int rowsAffected = pstDelete.executeUpdate();
+                        if (rowsAffected > 0) {
+                            JOptionPane.showMessageDialog(this, "Transaksi berhasil dihapus dan PC terkait telah tersedia kembali!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                            loadTable(); // Refresh tabel
+                            selectedId = -1; // Reset ID yang dipilih
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Gagal menghapus transaksi.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Penghapusan transaksi dibatalkan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih transaksi terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnHapusTrasaksiActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        loadTable();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -615,6 +702,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JButton btnBuatTransaksi;
     private javax.swing.JButton btnDikembalikan;
     private javax.swing.JButton btnHapusTrasaksi;
+    private javax.swing.JButton btnRefresh;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
